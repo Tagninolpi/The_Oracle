@@ -3,13 +3,19 @@ import os
 import discord
 from discord.ext import commands
 from aiohttp import web
-from dotenv import load_dotenv
 
 # ----------------- CONFIG -----------------
-load_dotenv()  # Load .env file if it exists (for local testing)
-DISCORD_TOKEN = os.environ.get("DISCORD_TOKEN")  # Will use Render env if deployed
+# Only load .env locally
+if os.environ.get("RENDER") != "true":  # You can set RENDER=True in Render env
+    try:
+        from dotenv import load_dotenv
+        load_dotenv()  # Load .env file if it exists
+    except ImportError:
+        pass  # Skip if python-dotenv is not installed
+
+DISCORD_TOKEN = os.environ.get("DISCORD_TOKEN")  # Use .env locally or Render env
 USE_WEB = os.environ.get("USE_WEB", "False").lower() == "true"  # Manual toggle
-PORT = int(os.environ.get("PORT", 5000))  # Render provides PORT env variable
+PORT = int(os.environ.get("PORT", 5000))  # Used only if USE_WEB=True
 # -----------------------------------------
 
 # ---------- Discord Bot ----------
