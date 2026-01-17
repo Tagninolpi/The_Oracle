@@ -10,24 +10,28 @@ class Reply(commands.Cog):
         name="reply",
         description="Answer that delphinian as the oracle"
     )
-    @app_commands.describe(message="The message the oracle should send")
-    async def reply(self, interaction: discord.Interaction, message: str):
+    @app_commands.default_permissions(manage_channels=True)
+    @app_commands.describe(msg="The message the oracle should send")
+    async def reply(self, interaction: discord.Interaction, msg: str):
         try:
-            # ✅ Defer the interaction so Discord knows we're handling it
-            await interaction.response.defer()
-            # Send the actual message in the channel
-            await interaction.channel.send(message)
+            # 1️⃣ Acknowledge the interaction silently
+            await interaction.response.defer(ephemeral=True)
+
+            # 2️⃣ Send the message normally in the channel
+            await interaction.channel.send(msg)
+
+            # 3️⃣ Delete the deferred "thinking" message so users see nothing
+            await interaction.delete_original_response()
+
         except discord.Forbidden:
-            # Only send this if absolutely needed (you could skip it)
+            # Only if bot can't send messages
             await interaction.followup.send(
                 "❌ I don't have permission to send messages here.",
                 ephemeral=True
             )
         except discord.HTTPException as e:
-            await interaction.followup.send(
-                f"❌ Failed to send message: {e}",
-                ephemeral=True
-            )
+            # Log other send errors
+            print(f"Failed to send message: {e}")
 
 # Setup
 async def setup(bot: commands.Bot):
