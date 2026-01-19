@@ -17,6 +17,22 @@ def normalize_question(q: str) -> str:
     # Keep only letters, convert to lowercase
     return re.sub(r'[^a-zA-Z]', '', q).lower()
 
+def send_daily_limit_message(channel, now, daily_limit):
+    tomorrow = datetime.datetime.combine(
+        now.date() + datetime.timedelta(days=1),
+        datetime.time(0, 0),
+        tzinfo=ORACLE_TZ
+    )
+    remaining = tomorrow - now
+    hours, remainder = divmod(int(remaining.total_seconds()), 3600)
+    minutes, seconds = divmod(remainder, 60)
+
+    return channel.send(
+        f"🔮 Oracle: The stars must rest until tomorrow. "
+        f"(Daily limit {daily_limit} reached)\n"
+        f"Time remaining: {hours}h {minutes}m {seconds}s"
+    )
+
 
 class Oracle(commands.Cog):
     def __init__(self, bot):
@@ -122,15 +138,31 @@ class Oracle(commands.Cog):
         # --- 3️⃣ Ask AI ---
         async with message.channel.typing():
             try:
-                #print(f"🤖 Asking AI for question: '{question}'")
                 prophecy = ask_oracle(question)
                 current_count += 1
-                #print(f"✅ AI returned response: '{prophecy}'")
+
             except Exception as e:
+                error_text = str(e)
+
                 print("❌ ORACLE ERROR:")
-                print(e)
+                print(error_text)
                 traceback.print_exc()
-                prophecy = "The stars are silent… (an error was revealed in the void)"
+
+                # --- FAIL-SAFE: AI hard daily quota hit ---
+                if "RESOURCE_EXHAUSTED" in error_text or "Quota exceeded" in error_text:
+                    await send_daily_limit_message(
+                        message.channel,
+                        now,
+                        self.DAILY_LIMIT
+                    )
+                    return
+
+                # --- Any other error: show real message ---
+                await message.channel.send(
+                    f"❌ **Oracle Error**:\n```{error_text}```"
+                )
+                return
+
 
         # Send the AI response
         await message.channel.send(f"🔮 **Oracle**: {prophecy}")
