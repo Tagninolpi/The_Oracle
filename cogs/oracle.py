@@ -33,6 +33,25 @@ def send_daily_limit_message(channel, now, daily_limit):
         f"Time remaining: {hours}h {minutes}m {seconds}s"
     )
 
+def oracle_status_message(now, current_count, daily_limit):
+    remaining_requests = daily_limit - current_count
+
+    tomorrow = datetime.datetime.combine(
+        now.date() + datetime.timedelta(days=1),
+        datetime.time(0, 0),
+        tzinfo=ORACLE_TZ
+    )
+
+    remaining_time = tomorrow - now
+    hours, remainder = divmod(int(remaining_time.total_seconds()), 3600)
+    minutes, _ = divmod(remainder, 60)
+
+    return (
+        f"🜂 **The Ledger of Stars** 🜂\n"
+        f"Whispers remaining: **{remaining_requests}**\n"
+        f"The sky renews in **{hours}h {minutes}m**"
+    )
+
 
 class Oracle(commands.Cog):
     def __init__(self, bot):
@@ -166,6 +185,15 @@ class Oracle(commands.Cog):
 
         # Send the AI response
         await message.channel.send(f"🔮 **Oracle**: {prophecy}")
+
+        # --- 3b️⃣ Send oracle status (ALWAYS) ---
+        status_msg = oracle_status_message(
+            now=now,
+            current_count=current_count,
+            daily_limit=self.DAILY_LIMIT
+        )
+        await message.channel.send(status_msg)
+
 
         # --- 4️⃣ Save request to database ---
         insert_request(
