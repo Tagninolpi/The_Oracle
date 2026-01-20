@@ -28,9 +28,26 @@ def ask_oracle(question: str) -> str:
         contents=SYSTEM_PROMPT + "\n\nQuestion: " + question,
     )
 
-    # Preferred accessor per docs
-    if response.text:
+    # ✅ Preferred accessor
+    if getattr(response, "text", None):
         return response.text.strip()
 
-    # Fallback (defensive)
-    return response.candidates[0].content.parts[0].text.strip()
+    # 🔒 Defensive fallback
+    candidates = getattr(response, "candidates", None)
+    if not candidates:
+        raise RuntimeError("Oracle returned no candidates.")
+
+    candidate = candidates[0]
+    content = getattr(candidate, "content", None)
+    if not content:
+        raise RuntimeError("Oracle returned empty content.")
+
+    parts = getattr(content, "parts", None)
+    if not parts or not hasattr(parts[0], "text"):
+        raise RuntimeError("Oracle response contained no readable text.")
+
+    text = parts[0].text
+    if not text or not text.strip():
+        raise RuntimeError("Oracle spoke, but no words were heard.")
+
+    return text.strip()
