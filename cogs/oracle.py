@@ -170,18 +170,29 @@ class Oracle(commands.Cog):
                 error_text = str(e)
                 traceback.print_exc()
 
-                if "RESOURCE_EXHAUSTED" in error_text or "Quota" in error_text:
-                    await send_daily_limit_message(
-                        message.channel,
-                        now,
-                        self.DAILY_LIMIT,
+                overload_signals = (
+                    "RESOURCE_EXHAUSTED",
+                    "Quota",
+                    "overloaded",
+                    "503",
+                    "UNAVAILABLE",
+                )
+
+                if any(signal in error_text for signal in overload_signals):
+                    await message.channel.send(
+                        "🔮 **Oracle**: The stars are clouded. "
+                        "Too many voices speak at once. "
+                        "Return when the sky quiets."
                     )
                     return
 
+                # All other errors: show real message
                 await message.channel.send(
                     f"❌ **Oracle Error**:\n```{error_text}```"
                 )
                 return
+
+
 
         # =========================
         # Send response
