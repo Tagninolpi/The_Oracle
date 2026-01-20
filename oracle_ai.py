@@ -28,26 +28,30 @@ def ask_oracle(question: str) -> str:
         contents=SYSTEM_PROMPT + "\n\nQuestion: " + question,
     )
 
-    # ✅ Preferred accessor
+    # 1️⃣ Preferred accessor
     if getattr(response, "text", None):
-        return response.text.strip()
+        text = response.text.strip()
+        if text:
+            return text
 
-    # 🔒 Defensive fallback
+    # 2️⃣ Structured fallback
     candidates = getattr(response, "candidates", None)
-    if not candidates:
-        raise RuntimeError("Oracle returned no candidates.")
+    if candidates:
+        try:
+            parts = candidates[0].content.parts
+            text_parts = [
+                p.text.strip()
+                for p in parts
+                if hasattr(p, "text") and p.text and p.text.strip()
+            ]
+            if text_parts:
+                return " ".join(text_parts)
+        except Exception:
+            pass
 
-    candidate = candidates[0]
-    content = getattr(candidate, "content", None)
-    if not content:
-        raise RuntimeError("Oracle returned empty content.")
+    # 3️⃣ Final oracle silence (NO exception)
+    return (
+        "The Oracle inhaled to speak… then chose silence. "
+        "Ask again when the current steadies."
+    )
 
-    parts = getattr(content, "parts", None)
-    if not parts or not hasattr(parts[0], "text"):
-        raise RuntimeError("Oracle response contained no readable text.")
-
-    text = parts[0].text
-    if not text or not text.strip():
-        raise RuntimeError("Oracle spoke, but no words were heard.")
-
-    return text.strip()
