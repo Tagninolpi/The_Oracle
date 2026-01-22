@@ -82,7 +82,7 @@ async def send_daily_limit_message(channel, now, daily_limit):
 class Oracle(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.WATCH_CHANNEL_ID = 1454904537067294870
+        self.WATCH_CHANNEL_ID = 1406937106458345623
         self.DAILY_LIMIT = 20
 
         # Precompiled regex (safer + faster)
