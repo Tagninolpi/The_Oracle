@@ -82,7 +82,7 @@ async def send_daily_limit_message(channel, now, daily_limit):
 class Oracle(commands.Cog):
     def __init__(self, bot): 
         self.bot = bot
-        self.WATCH_CHANNEL_ID = 1445080995480076441 
+        self.WATCH_CHANNEL_ID = [1445080995480076441,1464061703015895233]
         self.DAILY_LIMIT = 20
 
         # Precompiled regex (safer + faster)
@@ -96,7 +96,7 @@ class Oracle(commands.Cog):
         if message.author.bot:
             return
 
-        if message.channel.id != self.WATCH_CHANNEL_ID:
+        if not (message.channel.id in self.WATCH_CHANNEL_ID):
             return
 
         match = self.trigger_regex.match(message.content.strip())
