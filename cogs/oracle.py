@@ -52,7 +52,7 @@ def oracle_status_message(now, current_count, daily_limit):
     minutes, _ = divmod(remainder, 60)
 
     return (
-        f"✨ **The Ledger of Stars** ✨\n"
+        f"🔮✨ **The Ledger of Stars** ✨🔮\n"
         f"Whispers remaining: **{remaining_requests}**\n"
         f"The sky renews in **{hours}h {minutes}m**"
     )
@@ -70,7 +70,7 @@ async def send_daily_limit_message(channel, now, daily_limit):
     minutes, seconds = divmod(remainder, 60)
 
     await channel.send(
-        f"🔮 Oracle: The stars must rest until tomorrow. "
+        f" ࣪💟  Oracle: The stars must rest until tomorrow. "
         f"(Daily limit {daily_limit} reached)\n"
         f"Time remaining: {hours}h {minutes}m {seconds}s"
     )
@@ -113,7 +113,7 @@ class Oracle(commands.Cog):
         previous = find_previous_response(normalized_question)
         if previous:
             await message.channel.send(
-                f"🔮 **Oracle**: {previous} *(from memory)*"
+                f"💟  **Oracle**: {previous} *(from memory)*"
             )
             return
 
@@ -195,7 +195,7 @@ class Oracle(commands.Cog):
                         current_count=current_count,
                         daily_limit=self.DAILY_LIMIT,
                         message=(
-                            "🔮 **Oracle**: The stars are clouded. "
+                            "💟  **Oracle**: The stars are clouded. "
                             "Too many voices speak at once. "
                             "Return when the sky quiets."
                         ),
@@ -219,7 +219,7 @@ class Oracle(commands.Cog):
         # =========================
         # Send response
         # =========================
-        await message.channel.send(f"🔮 **Oracle**: {prophecy}")
+        await message.channel.send(f"💟  **Oracle**: {prophecy}")
         await message.channel.send(
             oracle_status_message(
                 now,
