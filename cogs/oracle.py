@@ -52,7 +52,7 @@ def oracle_status_message(now, current_count, daily_limit):
     minutes, _ = divmod(remainder, 60)
 
     return (
-        f"🜂 **The Ledger of Stars** 🜂\n"
+        f"✨ **The Ledger of Stars** ✨\n"
         f"Whispers remaining: **{remaining_requests}**\n"
         f"The sky renews in **{hours}h {minutes}m**"
     )
